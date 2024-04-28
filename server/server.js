@@ -1,10 +1,11 @@
 const {VertexAI} = require('@google-cloud/vertexai');
 
+
 /**
  * TODO(developer): Update these variables before running the sample.
  */
 async function createNonStreamingMultipartContent(
-  projectId = 'PROJECT_ID',
+  projectId = 'iotcam-421623',
   location = 'us-central1',
   model = 'gemini-1.0-pro-vision',
   image = 'gs://generativeai-downloads/images/scones.jpg',
@@ -27,7 +28,7 @@ async function createNonStreamingMultipartContent(
   };
 
   const textPart = {
-    text: 'what is shown in this image?',
+    text: 'What am i looking at?',
   };
 
   const request = {
@@ -51,3 +52,5 @@ async function createNonStreamingMultipartContent(
 
   console.log(fullTextResponse);
 }
+
+createNonStreamingMultipartContent();
