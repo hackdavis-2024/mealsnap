@@ -47,13 +47,13 @@ export default function RecipeReviewCard({meal}) {
             <MoreVertIcon />
           </IconButton>
         }
-        title={meal.title}
+        title={meal.name}
         subheader={meal.date}
       />
       <CardMedia
         component="img"
         height="194"
-        image="/static/images/cards/paella.jpg"
+        image={meal.image}
         alt="Paella dish"
       />
       <CardContent>

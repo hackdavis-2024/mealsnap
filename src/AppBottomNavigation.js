@@ -20,7 +20,7 @@ export default function AppBottomNavigation() {
 
   return (
     <BottomNavigation sx={{ 
-      width: 500,
+      width: 300,
       bottom: 0,
       position: 'fixed',
       left: '50%',

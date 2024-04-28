@@ -110,7 +110,10 @@ router.post('/upload', upload.single('image'), async (req, res) => {
                 console.log('Received JSON string:', imageJSON);
 
                 // Find the indices of the first and last triple backticks
-                const startIndex = imageJSON.indexOf('```json') + '```json'.length;
+                // const startIndex = imageJSON.indexOf('```json') + '```json'.length;
+                // /const endIndex = imageJSON.lastIndexOf('```');
+
+                const startIndex = imageJSON.search(/^```json|^```JSON/i) + '```json'.length;
                 const endIndex = imageJSON.lastIndexOf('```');
 
                 // Extract the substring between the first and last triple backticks
@@ -119,8 +122,10 @@ router.post('/upload', upload.single('image'), async (req, res) => {
                 console.log("trimString: ", trimString);
                 // Parse the JSON string
 
+                const catchString = trimString.replace(/^[^{]*{/, '{');
+
                 // Regular expression to remove "g" and "mg" units
-                const cleanedString = trimString.replace(/(\d+(?:,\d{3})*(?:\.\d+)?)[gm]g?/g, '$1');
+                const cleanedString = catchString.replace(/(\d+(?:,\d{3})*(?:\.\d+)?)[gm]g?/g, '$1');
 
                 let parsedJSON = JSON.parse(cleanedString);
                 console.log('Image JSON:', parsedJSON);
