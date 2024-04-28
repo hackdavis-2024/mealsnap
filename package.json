@@ -5,6 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
+    "@google-cloud/storage": "^7.10.2",
     "@google-cloud/vertexai": "^1.1.0",
     "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",

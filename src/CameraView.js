@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import axios from 'axios';
 import styled from 'styled-components';
 import AppBottomNavigation from './AppBottomNavigation';
 import { IconButton, Modal, Box, TextField, Button } from '@mui/material';
@@ -80,13 +81,50 @@ export default function Camera() {
       context.drawImage(video, 0, 0, videoWidth, videoHeight);
       const imageURL = canvas.toDataURL('image/png');
       setImageSrc(imageURL);
+
+      // Create a new image element
+      // var img = new Image();
+      // img.src = dataURL;
+
       handleOpen();
     }
   };
 
-  const postPhoto = () => {
+  const postPhoto = async () => {
     console.log('Posting photo');
-  }
+
+    // Create a new image element
+    // Not necessary, just need the imageURL
+    // var img = new Image();
+    // img.src = imageSrc;
+
+    // Feat: Add progress bar
+    // const [uploadProgress, setUploadProgress] = useState(0);
+
+    if (!imageSrc) {
+      console.error('No image to upload');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', imageSrc);
+
+    try {
+      const response = await axios.post('http://localhost:5001/images/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        //onUploadProgress: (progressEvent) => {
+          //const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+          //setUploadProgress(progress);
+        //}
+      });
+
+      console.log('Upload successful:', response.data);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    }
+  };
 
   return (
     <CameraContainer>

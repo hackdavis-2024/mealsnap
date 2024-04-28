@@ -5,6 +5,7 @@ const mongoose = require('mongoose')
 const cors = require('cors');
 
 const mealsRouter = require('./routes/meals.js');
+const imagesRouter = require('./routes/images.js');
 
 dotenv.config();
 
@@ -18,7 +19,9 @@ app.use(cors({
 const port = process.env.PORT || 5001; // default port is 5001
 
 app.use(express.json());
+
 app.use('/meals', mealsRouter);
+app.use('/images', imagesRouter);
 
 
 app.get("/", (req, res) => {

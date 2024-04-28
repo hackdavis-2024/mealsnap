@@ -19,7 +19,7 @@ export default function FeedPage() {
         carbs: 30,
         protein: 30,
         fat: 15,
-        carbs: 40,
+        carbs:                                                                                             40,
       },
     },
     {
