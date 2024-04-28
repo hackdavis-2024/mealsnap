@@ -1,115 +1,132 @@
 const { Storage } = require('@google-cloud/storage');
 const dotenv = require('dotenv');
+const {VertexAI} = require('@google-cloud/vertexai');
 const express = require('express');
 const router = express.Router();
-
-const app = express();
-
-const fs = require('fs');
+const Meal = require('../schemas/meal.js');
 const multer = require('multer');
-const { Router } = require('react-router-dom');
 
 // Configure multer
-const storage = multer.memoryStorage(); // Stores files in memory
-const upload = multer({ storage: storage });
-
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // no larger than 5mb
+  },
+});
 
 dotenv.config();
 
 // Set the name of the bucket
 const bucketName = process.env.BUCKET;
+const storage = new Storage(); 
+const bucket = storage.bucket(bucketName);
 
 // Define a function to upload an image to GCS
-async function uploadImage(imageFile) {
+async function uploadImage(imageFile, fileName) {
   try {
-    // Upload the image file to the bucket
-    const [file] = await storage.bucket(bucketName).upload(imageFile, {
-      // Set the metadata for the image file
-      metadata: {
-        contentType: 'image/jpeg', // Adjust content type as needed
-      },
+    // generate random name
+    const file = bucket.file(fileName+".jpg");
+    await file.save(imageFile, {
+      metadata: { contentType: 'image/jpeg' },
+      validation: 'md5'
     });
+    // Make the file public
+    await file.makePublic();
 
     // Return the public URL of the uploaded file
-    return file.publicUrl();
+    const publicUrl = `gs://${bucket.name}/${fileName}.jpg`;
+    // Return the public URL of the uploaded file
+    return publicUrl;
   } catch (error) {
     console.error('Error uploading image to Google Cloud Storage:', error);
     throw error;
   }
 }
 
-// // Route for uploading an image
-// router.post('/upload', upload.single('file'), async (req, res) => {
-//   try {
-//     console.log("/upload: \n");
-//     if (!req.file) {
-//       return res.status(400).json({ message: 'No file uploaded' });
-//     }
+async function createNonStreamingMultipartContent(
+  projectId = 'iotcam-421623',
+  location = 'us-central1',
+  model = 'gemini-1.0-pro-vision',
+  image = 'gs://generativeai-downloads/images/scones.jpg',
+  mimeType = 'image/jpeg'
+) {
+  // Initialize Vertex with your Cloud project and location
+  const vertexAI = new VertexAI({project: projectId, location: location});
 
-//     // Access the uploaded file through req.file
-//     console.log("Uploaded file:", req.file);
+  // Instantiate the model
+  const generativeVisionModel = vertexAI.getGenerativeModel({
+    model: model,
+  });
 
-//     // You can also read the file using fs.readFile if you need to process the binary data
-//     fs.readFile(req.file.path, (err, data) => {
-//       if (err) {
-//         console.error('Error reading uploaded file:', err);
-//         return res.status(500).json({ message: 'Error reading uploaded file' });
-//       }
-//       // Process the binary data as needed
-//       console.log('File content:', data);
-//       // You may want to delete the temporary file after processing
-//       fs.unlink(req.file.path, (err) => {
-//         if (err) {
-//           console.error('Error deleting uploaded file:', err);
-//         }
-//       });
-//     });
+  // For images, the SDK supports both Google Cloud Storage URI and base64 strings
+  const filePart = {
+    fileData: {
+      fileUri: image,
+      mimeType: mimeType,
+    },
+  };
 
-//     // Respond with success
-//     res.json({ message: 'File uploaded successfully' });
-//   } catch (error) {
-//     console.error('Error uploading file:', error);
-//     res.status(500).json({ message: 'Error uploading file' });
-//   }
-// });
+  const textPart = {
+    text: 'Generate a JSON with the following keys for this meal, "name", "calories", "fat", "protein", "carbohydrates", "sugar", "fiber", "sodium", "cholesterol". Use \
+    the image to determine the values for these keys. Use Imperial units for the values.',
+  };
 
-app.post('/upload', upload.single('file'), (req, res) => {
+  const request = {
+    contents: [{role: 'user', parts: [filePart, textPart]}],
+  };
+
+  console.log('Prompt Text:');
+  console.log(request.contents[0].parts[1].text);
+
+  console.log('Non-Streaming Response Text:');
+  // Create the response stream
+  const responseStream =
+    await generativeVisionModel.generateContentStream(request);
+
+  // Wait for the response stream to complete
+  const aggregatedResponse = await responseStream.response;
+
+  // Select the text from the response
+  const fullTextResponse =
+    aggregatedResponse.candidates[0].content.parts[0].text;
+  
+  return fullTextResponse;
+}
+
+router.post('/upload', upload.single('image'), async (req, res) => {
     console.log("/upload: \n");
     if (req.file) {
         console.log('Received file with size:', req.file.size);
-        res.status(200).send('File uploaded successfully');
+        const fileName = Math.random().toString(36).substring(7)+".jpg";
+        try {
+            console.log('Uploading file to Google Cloud Storage');
+            const url = await uploadImage(req.file.buffer, fileName);
+            if (url) {
+              console.log('URL:', url);
+              imageJSON = await createNonStreamingMultipartContent('iotcam-421623', 'us-central1', 'gemini-1.0-pro-vision', url, 'image/jpeg');
+              // turn the JSON string into a JSON object
+              imageJSON = JSON.parse(imageJSON);
+              console.log('Image JSON:', imageJSON);
+              // Create a new JSON object with the image URL and description
+              const mealJSON = {};
+              mealJSON.name = imageJSON.name;
+              mealJSON.description = req.body.caption;
+              mealJSON.date = new Date();
+              mealJSON.image = `https://storage.googleapis.com/${bucket.name}/${fileName}.jpg` 
+              // remove the name key from the imageJSON      
+              delete imageJSON.name;
+              mealJSON.nutritients = imageJSON;
+              const meal = new Meal(mealJSON);
+              await meal.save();
+            }
+            res.status(200).send({ message: 'File uploaded successfully', url });
+        } catch (error) {
+            console.error('Failed to upload image:', error);
+            res.status(500).send('Failed to upload image');
+        }
     } else {
         res.status(400).send('No file uploaded');
     }
-});
-
-
-// Define a function to delete an image from GCS
-async function deleteImage(filename) {
-    try {
-      // Delete the file from the bucket
-      await storage.bucket(bucketName).file(filename).delete();
-  
-      return true;
-    } catch (error) {
-      console.error('Error deleting image from Google Cloud Storage:', error);
-      throw error;
-    }
-  }
-  
-// Route for deleting an image
-app.delete('/images/:filename', async (req, res) => {
-try {
-    const { filename } = req.params;
-
-    // Delete the image from GCS
-    await deleteImage(filename);
-
-    res.json({ message: 'Image deleted successfully' });
-} catch (error) {
-    console.error('Error deleting image:', error);
-    res.status(500).json({ message: 'Error deleting image' });
-}
 });
 
 module.exports = router;

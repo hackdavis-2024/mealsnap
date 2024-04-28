@@ -3,8 +3,6 @@ const Meal = require('../schemas/meal.js');
 
 const router = Router();
 
-// CRUD routes
-
 // Create a new meal
 router.post('/', (req, res) => {
     console.log("req.body: ", req.body);
