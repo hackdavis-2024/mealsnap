@@ -3,6 +3,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose')
 const cors = require('cors');
+const bodyParser = require('body-parser')
 
 const mealsRouter = require('./routes/meals.js');
 const imagesRouter = require('./routes/images.js');
@@ -19,6 +20,9 @@ app.use(cors({
 const port = process.env.PORT || 5001; // default port is 5001
 
 app.use(express.json());
+
+app.use(bodyParser.json({ limit: '10mb' })); // Increase the limit to 10MB or whatever suits your needs
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 app.use('/meals', mealsRouter);
 app.use('/images', imagesRouter);

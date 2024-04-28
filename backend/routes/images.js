@@ -3,8 +3,16 @@ const dotenv = require('dotenv');
 const express = require('express');
 const router = express.Router();
 
-// Create a new instance of Storage
-const storage = new Storage();
+const app = express();
+
+const fs = require('fs');
+const multer = require('multer');
+const { Router } = require('react-router-dom');
+
+// Configure multer
+const storage = multer.memoryStorage(); // Stores files in memory
+const upload = multer({ storage: storage });
+
 
 dotenv.config();
 
@@ -30,20 +38,49 @@ async function uploadImage(imageFile) {
   }
 }
 
-// Route for uploading an image
-router.post('/upload', async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+// // Route for uploading an image
+// router.post('/upload', upload.single('file'), async (req, res) => {
+//   try {
+//     console.log("/upload: \n");
+//     if (!req.file) {
+//       return res.status(400).json({ message: 'No file uploaded' });
+//     }
+
+//     // Access the uploaded file through req.file
+//     console.log("Uploaded file:", req.file);
+
+//     // You can also read the file using fs.readFile if you need to process the binary data
+//     fs.readFile(req.file.path, (err, data) => {
+//       if (err) {
+//         console.error('Error reading uploaded file:', err);
+//         return res.status(500).json({ message: 'Error reading uploaded file' });
+//       }
+//       // Process the binary data as needed
+//       console.log('File content:', data);
+//       // You may want to delete the temporary file after processing
+//       fs.unlink(req.file.path, (err) => {
+//         if (err) {
+//           console.error('Error deleting uploaded file:', err);
+//         }
+//       });
+//     });
+
+//     // Respond with success
+//     res.json({ message: 'File uploaded successfully' });
+//   } catch (error) {
+//     console.error('Error uploading file:', error);
+//     res.status(500).json({ message: 'Error uploading file' });
+//   }
+// });
+
+app.post('/upload', upload.single('file'), (req, res) => {
+    console.log("/upload: \n");
+    if (req.file) {
+        console.log('Received file with size:', req.file.size);
+        res.status(200).send('File uploaded successfully');
+    } else {
+        res.status(400).send('No file uploaded');
     }
-
-    const imageUrl = await uploadImage(req.file.path);
-
-    res.json({ imageUrl });
-  } catch (error) {
-    console.error('Error uploading image:', error);
-    res.status(500).json({ message: 'Error uploading image' });
-  }
 });
 
 
@@ -61,7 +98,7 @@ async function deleteImage(filename) {
   }
   
 // Route for deleting an image
-router.delete('/images/:filename', async (req, res) => {
+app.delete('/images/:filename', async (req, res) => {
 try {
     const { filename } = req.params;
 

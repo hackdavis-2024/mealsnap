@@ -49,6 +49,7 @@ export default function Camera() {
   const canvasRef = useRef(null);
   const [open, setOpen] = React.useState(false);
   const [imageSrc, setImageSrc] = React.useState('');
+  const [imageBlob, setImageBlob] = React.useState('');
 
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -68,7 +69,6 @@ export default function Camera() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-
   const captureImage = () => {
     const canvas = document.createElement('canvas');
     const video = videoRef.current;
@@ -79,23 +79,28 @@ export default function Camera() {
       canvas.width = videoWidth;
       canvas.height = videoHeight;
       context.drawImage(video, 0, 0, videoWidth, videoHeight);
-      const imageURL = canvas.toDataURL('image/png');
+      const imageURL = canvas.toDataURL('image/jpeg', 0.5);
       setImageSrc(imageURL);
 
       // Create a new image element
       // var img = new Image();
       // img.src = dataURL;
 
-      handleOpen();
+      // Convert canvas to Blob
+      canvas.toBlob((blob) => {
+          setImageBlob(blob);  // Assuming setImageBlob stores the Blob for later use
+          handleOpen();        // Handling any other logic needed after capture
+      }, 'image/jpeg', 0.5);
     }
   };
 
   const postPhoto = async () => {
     console.log('Posting photo');
 
+    // TODO: Convert image source, which is only reference to image, into actual image data
     // Create a new image element
     // Not necessary, just need the imageURL
-    // var img = new Image();
+   // var img = new Image();
     // img.src = imageSrc;
 
     // Feat: Add progress bar
@@ -107,23 +112,43 @@ export default function Camera() {
     }
 
     const formData = new FormData();
-    formData.append('image', imageSrc);
+    formData.append('image', imageBlob, 'image.jpg');
 
-    try {
-      const response = await axios.post('http://localhost:5001/images/upload', formData, {
+    // try {
+    //   const response = await axios.post('http://localhost:5001/images/upload', formData, {
+    //     headers: {
+    //       'Content-Type': 'application/json'
+    //     },
+    //     //onUploadProgress: (progressEvent) => {
+    //       //const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+    //       //setUploadProgress(progress);
+    //     //}
+    //   });
+
+    //   console.log('Upload successful:', response.data);
+    
+
+  //   axios.post('http://localhost:5001/upload', formData, 
+  //     .then(response => response.json())
+  //     .then(data => console.log('Success:', data))
+  //     .catch((error) => {
+  //     console.error('Error:', error);
+  //   });
+  //   console.error('Error uploading image:', error);
+  // });
+
+  axios.post('http://localhost:5001/upload', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        //onUploadProgress: (progressEvent) => {
-          //const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-          //setUploadProgress(progress);
-        //}
-      });
-
-      console.log('Upload successful:', response.data);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-    }
+            // You don't need to set 'Content-Type': 'multipart/form-data',
+            // Axios will set the Content-Type correctly based on the FormData
+        }
+    })
+    .then(response => {
+        console.log('Success:', response.data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
   };
 
   return (
