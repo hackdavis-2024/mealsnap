@@ -68,7 +68,7 @@ async function createNonStreamingMultipartContent(
 
   const textPart = {
     text: 'Generate a JSON with the following keys for this meal, "name", "calories", "fat", "protein", "carbohydrates", "sugar", "fiber", "sodium", "cholesterol". Use \
-    the image to determine the values for these keys. Use Imperial units for the values.',
+    the image to determine the values for these keys. Use Imperial units in terms of grams for the values.',
   };
 
   const request = {
@@ -103,19 +103,39 @@ router.post('/upload', upload.single('image'), async (req, res) => {
             const url = await uploadImage(req.file.buffer, fileName);
             if (url) {
               console.log('URL:', url);
-              imageJSON = await createNonStreamingMultipartContent('iotcam-421623', 'us-central1', 'gemini-1.0-pro-vision', url, 'image/jpeg');
-              // turn the JSON string into a JSON object
-              imageJSON = JSON.parse(imageJSON);
-              console.log('Image JSON:', imageJSON);
-              // Create a new JSON object with the image URL and description
               const mealJSON = {};
-              mealJSON.name = imageJSON.name;
+              try {
+                let imageJSON = await createNonStreamingMultipartContent('iotcam-421623', 'us-central1', 'gemini-1.0-pro-vision', url, 'image/jpeg');
+                // Log the string before parsing to ensure it's valid JSON
+                console.log('Received JSON string:', imageJSON);
+
+                // Find the indices of the first and last triple backticks
+                const startIndex = imageJSON.indexOf('```json') + '```json'.length;
+                const endIndex = imageJSON.lastIndexOf('```');
+
+                // Extract the substring between the first and last triple backticks
+                const trimString = imageJSON.substring(startIndex, endIndex).trim();
+
+                console.log("trimString: ", trimString);
+                // Parse the JSON string
+
+                // Regular expression to remove "g" and "mg" units
+                const cleanedString = trimString.replace(/(\d+(?:,\d{3})*(?:\.\d+)?)[gm]g?/g, '$1');
+
+                let parsedJSON = JSON.parse(cleanedString);
+                console.log('Image JSON:', parsedJSON);
+                mealJSON.name = parsedJSON.name;
+                // remove the name key from the imageJSON      
+                delete parsedJSON.name;
+                mealJSON.nutrients = parsedJSON;
+
+              } catch (error) {
+                console.error('Error parsing JSON:', error);
+              }
+              // Create a new JSON object with the image URL and description
               mealJSON.description = req.body.caption;
               mealJSON.date = new Date();
-              mealJSON.image = `https://storage.googleapis.com/${bucket.name}/${fileName}.jpg` 
-              // remove the name key from the imageJSON      
-              delete imageJSON.name;
-              mealJSON.nutritients = imageJSON;
+              mealJSON.image = `https://storage.googleapis.com/${bucket.name}/${fileName}.jpg`  
               const meal = new Meal(mealJSON);
               await meal.save();
             }
