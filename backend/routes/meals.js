@@ -7,6 +7,7 @@ const router = Router();
 
 // Create a new meal
 router.post('/', (req, res) => {
+    console.log("req.body: ", req.body);
     const { name, description, date, nutrients } = req.body;
     const meal = new Meal({
       name,
@@ -23,24 +24,27 @@ router.post('/', (req, res) => {
     });
 });
 
-// // Get all meals
-// router.get('/', (req: Request, res: Response) => {
-//     Meal.find()
-//         .then(meals => {
-//             res.json(meals); // Send all the meals as the response
-//         })
-//         .catch(err => {
-//             res.status(500).json({ message: err.message });
-//         });
-// });
+// Get all meals
+router.get("/", (req, res) => {
+    Meal.find()
+        .then(meals => {
+            res.json(meals); // Send all the meals as the response
+        })
+        .catch(err => {
+            res.status(500).json({ message: err.message });
+        });
+});
 
 // Get a single meal by ID
-router.get('/:id', (req, res) => {
+router.get("/:id", (req, res) => {
     const { id } = req.params;
 
-    console.log("alfjas;fkjls;d");
+    console.log("id: " + id);
+    console.log(Meal.collection.name);
+
     Meal.findById(id)
         .then(meal => {
+            console.log("meal: " + meal);
             if (!meal) {
                 return res.status(404).json({error: 'Meal not found'});
             }
