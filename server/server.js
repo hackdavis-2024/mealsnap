@@ -28,7 +28,8 @@ async function createNonStreamingMultipartContent(
   };
 
   const textPart = {
-    text: 'What am i looking at?',
+    text: 'Generate a JSON with the following keys for this meal "food_description", "calories", "fat", "protein", "carbohydrates", "sugar", "fiber", "sodium", "cholesterol". Use \
+    the image to determine the food description and the values for the other keys. Use Imperial units for the values.',
   };
 
   const request = {
