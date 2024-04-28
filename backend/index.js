@@ -2,12 +2,19 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose')
+const cors = require('cors');
 
 const mealsRouter = require('./routes/meals.js');
 
 dotenv.config();
 
 const app = express();
+
+app.use(cors({
+    // only allow requests from this origin
+    origin: 'http://localhost:3000' // TODO: change for final product
+}));
+
 const port = process.env.PORT || 5001; // default port is 5001
 
 app.use(express.json());

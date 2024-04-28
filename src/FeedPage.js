@@ -42,7 +42,7 @@ export default function FeedPage() {
 
   // On load, make a request to the backend to get the feed data
   useEffect(() => {
-    axios.get('http://localhost:3000/feed')
+    axios.get('http://localhost:5001/meals')
       .then((response) => {
         setFeedData(response.data);
       })
