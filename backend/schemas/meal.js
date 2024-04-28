@@ -1,22 +1,4 @@
-import { Document, model, Schema, Types } from "mongoose";
-
-interface Nutrients {
-    calories: Number;
-    protein?: Number;
-    carbohydrates?: Number;
-    fats?: Number;
-    fiber?: Number;
-    sugar?: Number;
-    sodium?: Number;
-    cholesterol?: Number;
-}
-
-interface Meal extends Document {
-    name: String;
-    description: String;
-    image: String;
-    nutrients: Nutrients;
-}
+const { Schema, model } = require("mongoose");
 
 const mealSchema = new Schema({
     name: String,
@@ -33,8 +15,8 @@ const mealSchema = new Schema({
         sodium: { type: Number, required: false },
         cholesterol: { type: Number, required: false }
     }
-})
+});
 
-const Meal = model<Meal>("Meal", mealSchema);
+const Meal = model("Meal", mealSchema);
 
-export default Meal;
+module.exports = Meal;
