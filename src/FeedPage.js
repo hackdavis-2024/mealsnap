@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-
+import "./FeedPage.css"
 import MealCard from './MealCard';
 import AppBottomNavigation from './AppBottomNavigation';
 
@@ -53,9 +53,12 @@ export default function FeedPage() {
 
   return (
   <div>
+    <div>
     {feedData.map((meal) => {
+      
       return <MealCard meal={meal} />;
     })}
+    </div>
     <AppBottomNavigation />
   </div>
   );

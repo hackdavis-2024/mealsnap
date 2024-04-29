@@ -39,7 +39,7 @@ export default function RecipeReviewCard({meal}) {
       <CardHeader
         avatar={
           <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-            R
+            J
           </Avatar>
         }
         action={

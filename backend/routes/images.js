@@ -68,7 +68,7 @@ async function createNonStreamingMultipartContent(
 
   const textPart = {
     text: 'Generate a JSON with the following keys for this meal, "name", "calories", "fat", "protein", "carbohydrates", "sugar", "fiber", "sodium", "cholesterol". Use \
-    the image to determine the values for these keys. Use Imperial units in terms of grams for the values.',
+    the image to determine the values for these keys. Use Imperial units in terms of grams (not milligrams) for the values.',
   };
 
   const request = {
@@ -123,6 +123,8 @@ router.post('/upload', upload.single('image'), async (req, res) => {
                 // Parse the JSON string
 
                 const catchString = trimString.replace(/^[^{]*{/, '{');
+                //const catch2String = catchString.replace(/.*?(\{)/, '$1');
+                //const catch3String = catch2String.replace(/^[^{]*\{/, '{');
 
                 // Regular expression to remove "g" and "mg" units
                 const cleanedString = catchString.replace(/(\d+(?:,\d{3})*(?:\.\d+)?)[gm]g?/g, '$1');
