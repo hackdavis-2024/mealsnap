@@ -1,70 +1,32 @@
-# Getting Started with Create React App
+## Inspiration
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+There are many reasons to track your meals - to lose weight, to go on a bulk, etc. For many people, including myself (Jacob), meal tracking is such a tedious process, having to research into the caloric and nutritional content of a meal, and manually entering them into a spreadsheet. How could we solve this?
 
-## Available Scripts
+## What it does
 
-In the project directory, you can run:
+Our software, MealSnap, makes it incredibly easy to track meals. Take a picture with your webcam, and MealSnap will automatically break down the calories and other nutritional content in your meal, and this gets saved to your feed along with all the other meals you've logged. 
 
-### `npm start`
+## How we built it
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+We were inspired by the multi-modal capabilities of Google Gemini - we specifically used their Vertex AI API to send images to it and break down the nutritional content back as a convenient .json object. 
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+We used MongoDB to hold our meals collection as .json documents - storing info about a meal's name, description, timestamp, and all the nutritional info. We can't really store images in MongoDB, so we also use the Google Cloud Platform as a way to upload and store images to then display on the feed. 
 
-### `npm test`
+For frontend libraries, we used Material UI. And ChatGPT was a huge help in figuring out some errors and how to parse inputs. 
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+For the rest of the tech stack, we used React for the Frontend, and Express for the Backend, and Node.js to run our app.
 
-### `npm run build`
+## Challenges we ran into
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Between me (Jacob) and my partner (Juan), I am very new to web development, and spent the whole night learning and debugging a ton of backend. There was always new issues arising, from setting up the CRUD routes and URI formatting, to a bunch of parsing and formatting issues with the meal .jsons. 
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Accomplishments that we're proud of / What we learned
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+There were many issues we ran into throughout the night, but we persevered and even for as small of a prototype we have now, we're proud that we have it working to share it for this hackathon - this is my (Jacob) first hackathon I was able to submit :o. Hopefully this inspires other people to keep learning and keep trying!
 
-### `npm run eject`
+## What's next for MealSnap
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+We actually really like this idea for personal use and want to expand it further. 
+- Comprehensive table view; filter by nutritional value, dates, etc.
+- Dashboard for weekly / monthly views; meeting your nutritional goals
+- User profiles; share meals with other users : )
